@@ -33,13 +33,20 @@ const syncUserUpdation = inngest.createFunction(
     async ({ event }) => {
         const { id, first_name, last_name, email_addresses, image_url } = event.data
 
-
         const updatedUserData = {
             email: email_addresses[0].email_address,
             full_name: first_name + " " + last_name,
             profile_picture: image_url,
         }
-        await User.findOneAndUpdate(id, updatedUserData)
+
+        
+        const updatedUser = await User.findByIdAndUpdate(id, updatedUserData, { new: true })
+        if (!updatedUser) {
+            console.error(`User update failed: ID ${id} not found.`);
+            
+            throw new Error(`User with ID ${id} not found for update.`);
+        }
+        return { message: `User ${id} updated successfully.` };
     }
 )
 
