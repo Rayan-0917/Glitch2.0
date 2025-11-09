@@ -4,7 +4,7 @@ import User from "../models/User.js";
 import Connection from "../models/Connection.js";
 import fs from 'fs'
 
-// helper to be extra-robust if someone forgets to use protect
+
 const getUserIdFromReq = async (req) => {
   if (req.userId) return req.userId;
   if (typeof req.auth === 'function') {
@@ -14,7 +14,7 @@ const getUserIdFromReq = async (req) => {
   return req.auth?.userId || req.auth?.user_id || req.auth?.sub;
 }
 
-// FIND USER
+
 export const getUserData = async (req, res) => {
   try {
     const userId = await getUserIdFromReq(req);
@@ -31,7 +31,7 @@ export const getUserData = async (req, res) => {
   }
 }
 
-// UPDATE USER
+
 export const updateUserData = async (req, res) => {
   try {
     const userId = await getUserIdFromReq(req);
@@ -100,7 +100,7 @@ export const updateUserData = async (req, res) => {
   }
 }
 
-// DISCOVER
+
 export const discoverUsers = async (req, res) => {
   try {
     const userId = await getUserIdFromReq(req);
@@ -125,7 +125,7 @@ export const discoverUsers = async (req, res) => {
   }
 }
 
-// FOLLOW
+
 export const followUser = async (req, res) => {
   try {
     const userId = await getUserIdFromReq(req);
@@ -159,7 +159,7 @@ export const followUser = async (req, res) => {
   }
 }
 
-// UNFOLLOW
+
 export const unfollowUser = async (req, res) => {
   try {
     const userId = await getUserIdFromReq(req);
@@ -189,7 +189,7 @@ export const unfollowUser = async (req, res) => {
 }
 
 
-//Send connection request
+
 export const sendConnectionRequest = async (req, res) => {
   try {
     const userId = await getUserIdFromReq(req);
@@ -237,7 +237,7 @@ export const sendConnectionRequest = async (req, res) => {
   }
 }
 
-//Get user connections
+
 export const getUserConnections = async (req, res) => {
   try {
     const userId = await getUserIdFromReq(req);
@@ -266,7 +266,7 @@ export const getUserConnections = async (req, res) => {
 };
 
 
-//Accept connection request
+
 export const acceptConnectionRequest = async (req, res) => {
   try {
     const userId = await getUserIdFromReq(req);
@@ -300,7 +300,7 @@ export const acceptConnectionRequest = async (req, res) => {
   }
 }
 
-//get profile and posts of other users
+
 export const getUserProfiles = async (req, res) => {
   try {
     const { profileId } = req.body
