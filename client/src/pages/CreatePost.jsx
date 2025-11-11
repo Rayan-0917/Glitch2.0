@@ -1,18 +1,54 @@
 import React, { useState } from 'react'
-import { dummyUserData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
 import { X, Image } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useSelector } from 'react-redux'
+import { useAuth } from '@clerk/clerk-react'
+import api from '../api/axios'
+
 
 const CreatePost = () => {
-  const user=dummyUserData
+  
   const navigate=useNavigate()
   const [content, setContent]=useState('')
   const [images, setImages]=useState([])
   const [loading, setLoading]=useState(false)
 
+  const user = useSelector((state) => state.user.value)
+  const { getToken } = useAuth()
+
   const handleSubmit=async()=>{
-    
+    if (!images.length && !content) {
+      return toast.message('Please add image or content')
+    }
+    setLoading(true)
+    const postType = images.length && content ? 'text_with_image' : images.length ? 'image' : 'text'
+    try {
+      const formData = new FormData()
+      formData.append('content', content)
+      formData.append('post_type', postType)
+      images.map((image) => {
+        formData.append('images', image)
+      })
+
+      const { data } = await api.post('/api/post/add', formData, {
+        headers: {
+          Authorization: `Bearer ${await getToken({template: "jwt"})}`
+        }
+      })
+
+      if (data.success) {
+        navigate('/')
+      }
+      else {
+        console.log(data.message)
+        throw new error(data.message)
+      }
+    } catch (error) {
+      console.log(error.message)
+      throw new error(error.message)
+    }
+    setLoading(false)
   }
   return (
     <div className='min-h-screen bg-linear-to-b from-black via-gray-900 to-gray-800'>

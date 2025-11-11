@@ -1,35 +1,57 @@
-import { Heart, MessageCircle, Share2 } from 'lucide-react'
+import { Heart, MessageCircle, Share2, X } from 'lucide-react'
 import moment from 'moment'
 import React, { useState } from 'react'
-import { dummyUserData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useAuth } from '@clerk/clerk-react'
+import api from '../api/axios'
+import toast from 'react-hot-toast'
+
 
 const PostCardProfile = ({ post, onClose }) => {
   const [likes, setLikes] = useState(post.likes_count)
-  const currentUser = dummyUserData
+  const currentUser = useSelector((state) => state.user.value)
   const hashtags = post.content.replace(
     /(#\w+)/g,
     '<span class="text-indigo-600">$1</span>'
   )
 
   const navigate = useNavigate()
+  const {getToken}=useAuth()
+    
+  const handleLike =async () => {
+    try {
+      const {data}=await api.post(`/api/post/like`, {postId: post._id}, {headers: {
+        Authorization: `Bearer ${await getToken({template: "jwt"})}`
+      }})
 
-  const handleLike = () => {
-    if (likes.includes(currentUser._id)) {
-      setLikes(likes.filter((id) => id !== currentUser._id))
-    } else {
-      setLikes([...likes, currentUser._id])
+      if(data.success){
+        toast.success(data.message)
+        setLikes(prev=>{
+          if(prev.includes(currentUser._id)){
+            return prev.filter(id=>id!==currentUser._id)
+          }
+          else{
+            return [...prev, currentUser._id]
+          }
+        })
+      }
+      else{
+        toast(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
     }
   }
 
   return (
-    <div className="relative bg-linear-to-b from-white to-slate-300 rounded-xl shadow p-4 space-y-10 w-full max-w-3xl mx-auto">
+    <div className="h-full relative bg-linear-to-b from-white to-slate-300 rounded-xl shadow p-4 space-y-10 w-full max-w-3xl mx-auto">
      
       <button
         className="absolute top-2 right-2 text-gray-700 hover:text-black text-2xl font-bold cursor-pointer"
         onClick={onClose}
       >
-        ✕
+        <X/>
       </button>
 
    

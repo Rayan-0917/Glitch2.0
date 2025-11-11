@@ -2,34 +2,64 @@ import imagekit from "../configs/imageKit.js"
 import { inngest } from "../inngest/index.js";
 import User from "../models/User.js";
 import Connection from "../models/Connection.js";
+import Post from "../models/Post.js";
 import fs from 'fs'
 
 
 const getUserIdFromReq = async (req) => {
   if (req.userId) return req.userId;
-  if (typeof req.auth === 'function') {
-    const ad = await req.auth();
-    return ad?.userId || ad?.user_id || ad?.sub;
+
+  let authData = req.auth;
+
+  
+  if (typeof req.auth === "function") {
+    authData = await req.auth();
   }
-  return req.auth?.userId || req.auth?.user_id || req.auth?.sub;
-}
+
+  return (
+    authData?.userId ||
+    authData?.user_id ||
+    authData?.sub ||
+    null
+  );
+};
 
 
 export const getUserData = async (req, res) => {
   try {
     const userId = await getUserIdFromReq(req);
-    if (!userId) return res.status(401).json({ success: false, message: 'User not authenticated' });
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
     }
-    res.json({ success: true, user });
+
+    
+    let user = await User.findById(userId);
+
+ 
+    if (!user) {
+      const claims = req.auth.sessionClaims;
+
+      user = await User.create({
+        _id: userId,
+        email: claims.email,
+        full_name: `${claims.first_name || ""} ${claims.last_name || ""}`.trim(),
+        username: (claims.email || userId).split("@")[0],
+        bio: "",
+        location: "",
+        followers: [],
+        following: [],
+        connections: [],
+      });
+    }
+
+    return res.json({ success: true, user });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error("getUserData error:", error);
+    return res.status(500).json({ success: false, message: error.message });
   }
-}
+};
+
 
 
 export const updateUserData = async (req, res) => {
@@ -41,14 +71,14 @@ export const updateUserData = async (req, res) => {
     const tempUser = await User.findById(userId);
     if (!tempUser) return res.status(404).json({ success: false, message: 'User not found' });
 
-    // default to existing username if not provided
+    
     if (!username) username = tempUser.username;
 
-    // if username changed, check for conflicts
+   
     if (username !== tempUser.username) {
       const existing = await User.findOne({ username });
       if (existing) {
-        username = tempUser.username; // revert to old if taken
+        username = tempUser.username; 
       }
     }
 
@@ -137,7 +167,7 @@ export const followUser = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    // normalize ids to strings for comparison
+    
     if (user.following.map(f => f.toString()).includes(id.toString())) {
       return res.json({ success: false, message: 'Already following user' });
     }

@@ -57,7 +57,7 @@ const ViewStory = ({viewStory, setViewStory}) => {
     }
 
   return (
-    <div className='fixed inset-0 z-110 h-screen bg-black bg-opacity-90 flex items-center justify-center p-4' style={{backgroundColor: viewStory.media_type==='text' ? viewStory.background_color : '#000000'}}>
+    <div className='fixed inset-0 z-110 h-screen bg-black bg-opacity-90 flex items-center justify-center p-4' style={{backgroundColor: viewStory.media_type==='text' ? viewStory.background_colour : '#000000'}}>
         <div className='absolute top-0 left-0 w-full h-1 bg-gray-700'>
             <div className='h-full bg-white transition-all duration-100 linear' style={{width: `${progress}%`}}>
 

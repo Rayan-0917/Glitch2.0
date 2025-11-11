@@ -1,8 +1,9 @@
 import React from 'react'
-import { dummyConnectionsData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 const Messages = () => {
+  const {connections}=useSelector((state)=>state.connections)
   const navigate=useNavigate();
   return (
     <div className='min-h-screen relative bg-linear-to-l from-slate-800 to-stone-900'>
@@ -11,7 +12,7 @@ const Messages = () => {
           <h1 className='text-3xl font-bold mb-2 text-white'>Messages</h1>
         </div>
         <div className='flex flex-col gap-3'>
-          {dummyConnectionsData.map((user)=>(
+          {connections.map((user)=>(
             <div onClick={()=>navigate(`/messages/${user._id}`)} key={user._id} className='max-w-xl flex flex-wrap gap-5 p-6 bg-linear-to-b from-white to-slate-300 shadow rounded-md cursor-pointer'>
               <img src={user.profile_picture} alt="" className='w-10 h-10 rounded-full mx-auto'/>
               <div className='flex-1'>
